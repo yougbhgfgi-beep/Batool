@@ -1,0 +1,21 @@
+{
+  "name": "عبد الرحمن ❤️ بتول",
+  "short_name": "حبنا",
+  "description": "موقع حب عبد الرحمن و بتول",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#e11d48",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["lifestyle", "social"]
+}
