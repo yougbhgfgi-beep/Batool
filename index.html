@@ -447,15 +447,17 @@
             const [activeNotification, setActiveNotification] = useState(null);
             const [clickHearts, setClickHearts] = useState([]);
             const [tapCount, setTapCount] = useState(0);
-            const [showMagic, setShowMagic] = useState(false);
             const audioRef = useRef(null);
             
-            // Secret tap magic: tap the heart 7 times quickly
+            // Secret tap: tap the heart 7 times to trigger install
             const handleSecretTap = () => {
                 setTapCount(prev => {
                     const next = prev + 1;
                     if (next >= 7) {
-                        setShowMagic(true);
+                        if (deferredPrompt) {
+                            deferredPrompt.prompt();
+                            deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+                        }
                         return 0;
                     }
                     setTimeout(() => setTapCount(prev => prev > 0 ? 0 : 0), 3000);
@@ -932,7 +934,6 @@
 
                     {/* Final Scene */}
                     {showFinalScene && <FinalSceneComponent onClose={() => setShowFinalScene(false)} />}
-                    {showMagic && <MagicScene onClose={() => setShowMagic(false)} />}
                 </div>
             );
         }
@@ -1244,79 +1245,6 @@
                                 )}
                             </div>
                         )}
-                    </div>
-                </div>
-            );
-        }
-
-        function MagicScene({ onClose }) {
-            const [messages, setMessages] = useState([]);
-            const secretMessages = [
-                { text: "سحر حبنا مش بينتهي أبداً..", delay: 500 },
-                { text: "زي ما لمسة السحر خلتنا نلتقي، حبنا هيفضل معجزة 💫", delay: 2500 },
-                { text: "بتول.. أنتي أجمل سحر في حياتي ❤️", delay: 5000 },
-                { text: "كل مرة بشوفك، بحس إن في سحر بيخليني أعشقك أكتر 🪄", delay: 7500 },
-                { text: "سحر حبنا قوي لدرجة إنه يخلي النجوم تنور في عز النهار ✨", delay: 10000 },
-                { text: "زي ما السحر بيخلي الأشياء المستحيلة تتحقق، أنتي خليتيني أحقق أحلامي 💭", delay: 12500 },
-                { text: "بحبك.. مش مجرد كلمة، دي حقيقة سحرية عايش فيها 🥹💕", delay: 15000 },
-                { text: "دوسي على الزر تاني عشان تشوفي السحر تاني 🪄✨", delay: 18000 },
-            ];
-
-            useEffect(() => {
-                const timeouts = secretMessages.map(m => 
-                    setTimeout(() => setMessages(prev => [...prev, m.text]), m.delay)
-                );
-                return () => timeouts.forEach(clearTimeout);
-            }, []);
-
-            const sparkles = React.useMemo(() => 
-                [...Array(50)].map((_, i) => ({
-                    id: i, left: Math.random() * 100, top: Math.random() * 100,
-                    delay: Math.random() * 3, size: 3 + Math.random() * 5,
-                    duration: 1.5 + Math.random() * 2,
-                    color: ['#f43f5e', '#a855f7', '#fbbf24', '#fff'][Math.floor(Math.random() * 4)]
-                })), []
-            );
-
-            return (
-                <div className="fixed inset-0 z-[200] bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-950 flex flex-col items-center justify-center text-center p-6 overflow-y-auto" dir="rtl">
-                    {/* Animated sparkles */}
-                    <div className="fixed inset-0 pointer-events-none z-0">
-                        {sparkles.map(s => (
-                            <div key={s.id} className="absolute rounded-full animate-ping opacity-70"
-                                style={{
-                                    left: `${s.left}%`, top: `${s.top}%`,
-                                    width: s.size + 'px', height: s.size + 'px',
-                                    backgroundColor: s.color,
-                                    animationDelay: s.delay + 's',
-                                    animationDuration: s.duration + 's',
-                                }}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Magic wand glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-rose-500/10 blur-3xl animate-pulse-slow pointer-events-none z-0"></div>
-
-                    <button onClick={onClose} className="absolute top-6 left-6 md:top-8 md:left-8 text-slate-400 hover:text-white transition-all text-4xl font-bold z-50 hover:rotate-90">×</button>
-
-                    <div className="relative z-10 max-w-2xl w-full">
-                        {/* Magic wand icon */}
-                        <div className="text-7xl mb-8 md:mb-12 animate-float">🪄✨</div>
-
-                        <h2 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-yellow-300 to-purple-400 mb-8 md:mb-12 font-script drop-shadow-2xl">
-                            ✨ سحر حبنا ✨
-                        </h2>
-
-                        {/* Messages */}
-                        <div className="space-y-6">
-                            {messages.map((msg, i) => (
-                                <div key={i} style={{animation: 'slideUp 0.8s ease-out'}}
-                                    className="bg-slate-900/70 backdrop-blur-md p-6 md:p-8 rounded-[2rem] border border-rose-500/20 shadow-[0_0_30px_rgba(225,29,72,0.15)]">
-                                    <p className="text-xl md:text-3xl font-bold text-rose-100 leading-relaxed">{msg}</p>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </div>
             );
