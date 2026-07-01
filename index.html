@@ -455,11 +455,12 @@
                 if (tapRef.current.timer) clearTimeout(tapRef.current.timer);
                 if (tapRef.current.count >= 7) {
                     tapRef.current.count = 0;
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then((result) => {
+                    const prompt = deferredPromptRef.current;
+                    if (prompt) {
+                        prompt.prompt();
+                        prompt.userChoice.then((result) => {
                             if (result.outcome === 'accepted') setShowInstall(false);
-                            setDeferredPrompt(null);
+                            deferredPromptRef.current = null;
                         });
                     } else {
                         setShowInstall(true);
@@ -473,13 +474,13 @@
                 "./public/Albumaty.Com_Tamer_Ashour_Khalini.mp3"
             ];
             const [currentSongIndex, setCurrentSongIndex] = useState(0);
-            const [deferredPrompt, setDeferredPrompt] = useState(null);
+            const deferredPromptRef = useRef(null);
             const [showInstall, setShowInstall] = useState(false);
 
             useEffect(() => {
                 const handler = (e) => {
                     e.preventDefault();
-                    setDeferredPrompt(e);
+                    deferredPromptRef.current = e;
                     setShowInstall(true);
                 };
                 window.addEventListener('beforeinstallprompt', handler);
@@ -488,11 +489,12 @@
             }, []);
 
             const handleInstall = async () => {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const result = await deferredPrompt.userChoice;
+                const prompt = deferredPromptRef.current;
+                if (!prompt) return;
+                prompt.prompt();
+                const result = await prompt.userChoice;
                 if (result.outcome === 'accepted') setShowInstall(false);
-                setDeferredPrompt(null);
+                deferredPromptRef.current = null;
             };
 
             useEffect(() => {
