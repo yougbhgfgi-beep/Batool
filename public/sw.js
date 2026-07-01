@@ -1,5 +1,5 @@
-const CACHE = "love-cache-v1";
-const urls = ["/", "/manifest.json", "/icon.svg"];
+const CACHE = "love-cache-v2";
+const urls = ["/", "/manifest.json", "/icon.svg", "/icon-192x192.png", "/icon-512x512.png", "/og-image.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
