@@ -446,23 +446,27 @@
             const [isPlaying, setIsPlaying] = useState(false);
             const [activeNotification, setActiveNotification] = useState(null);
             const [clickHearts, setClickHearts] = useState([]);
-            const [tapCount, setTapCount] = useState(0);
+            const tapRef = useRef({ count: 0, timer: null });
             const audioRef = useRef(null);
-            
+
             // Secret tap: tap the heart 7 times to trigger install
             const handleSecretTap = () => {
-                setTapCount(prev => {
-                    const next = prev + 1;
-                    if (next >= 7) {
-                        if (deferredPrompt) {
-                            deferredPrompt.prompt();
-                            deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-                        }
-                        return 0;
+                tapRef.current.count++;
+                if (tapRef.current.timer) clearTimeout(tapRef.current.timer);
+                if (tapRef.current.count >= 7) {
+                    tapRef.current.count = 0;
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then((result) => {
+                            if (result.outcome === 'accepted') setShowInstall(false);
+                            setDeferredPrompt(null);
+                        });
+                    } else {
+                        setShowInstall(true);
                     }
-                    setTimeout(() => setTapCount(prev => prev > 0 ? 0 : 0), 3000);
-                    return next;
-                });
+                } else {
+                    tapRef.current.timer = setTimeout(() => { tapRef.current.count = 0; }, 3000);
+                }
             };
             
             const playlist = [
