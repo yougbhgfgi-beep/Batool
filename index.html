@@ -446,31 +446,8 @@
             const [isPlaying, setIsPlaying] = useState(false);
             const [activeNotification, setActiveNotification] = useState(null);
             const [clickHearts, setClickHearts] = useState([]);
-            const tapRef = useRef({ count: 0, timer: null });
             const audioRef = useRef(null);
-
-            // Secret tap: tap the heart 7 times to trigger install
-            const handleSecretTap = () => {
-                tapRef.current.count++;
-                if (tapRef.current.timer) clearTimeout(tapRef.current.timer);
-                if (tapRef.current.count >= 7) {
-                    tapRef.current.count = 0;
-                    const prompt = deferredPromptRef.current;
-                    if (prompt) {
-                        prompt.prompt();
-                        prompt.userChoice.then((result) => {
-                            if (result.outcome === 'accepted') setShowInstall(false);
-                            deferredPromptRef.current = null;
-                        });
-                    } else if (navigator.share) {
-                        navigator.share({ title: 'بتول ❤️', url: window.location.href });
-                    } else {
-                        setShowInstallGuide(true);
-                    }
-                } else {
-                    tapRef.current.timer = setTimeout(() => { tapRef.current.count = 0; }, 3000);
-                }
-            };
+            const [showInstallMenu, setShowInstallMenu] = useState(false);
             
             const playlist = [
                 "./public/Albumaty.Com_Tamer_Ashour_Khalini.mp3"
@@ -782,6 +759,25 @@
                         </div>
                     )}
 
+                    {/* Install Menu - opens when heart is tapped */}
+                    {showInstallMenu && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowInstallMenu(false)}>
+                            <div className="bg-slate-900/95 border border-rose-500/30 rounded-[2rem] p-6 md:p-8 text-center shadow-[0_0_60px_rgba(225,29,72,0.3)] max-w-xs w-full" onClick={e => e.stopPropagation()}>
+                                <div className="text-5xl mb-4">❤️</div>
+                                <h3 className="text-xl font-bold text-rose-300 mb-6 font-script">عبد الرحمن ❤️ بتول</h3>
+                                <button onClick={() => { setShowInstallMenu(false); handleInstall(); }} className="w-full bg-gradient-to-r from-rose-600 to-indigo-700 text-white px-6 py-4 rounded-2xl text-lg font-bold shadow-[0_0_30px_rgba(225,29,72,0.5)] hover:scale-105 transition-all border border-rose-400/30 flex items-center justify-center gap-2">
+                                    📲 تثبيت التطبيق
+                                </button>
+                                {navigator.share && (
+                                    <button onClick={() => { setShowInstallMenu(false); navigator.share({ title: 'بتول ❤️', url: window.location.href }); }} className="w-full mt-3 bg-slate-800 text-slate-300 px-6 py-3 rounded-2xl text-base font-bold hover:bg-slate-700 transition-all border border-slate-700 flex items-center justify-center gap-2">
+                                        📤 مشاركة
+                                    </button>
+                                )}
+                                <button onClick={() => setShowInstallMenu(false)} className="mt-4 text-slate-500 text-sm hover:text-white transition-colors">إغلاق</button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Envelope Letter Modal */}
                     {showLetter && <EnvelopeMessage onClose={() => setShowLetter(false)} />}
                     <MiniMessages />
@@ -794,7 +790,7 @@
                         </div>
                         <div className="flex flex-col items-center mb-4 md:mb-6">
                             <span className="text-4xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-indigo-400 font-script drop-shadow-2xl">عبد الرحمن</span>
-                            <span onClick={handleSecretTap} className="text-3xl md:text-5xl text-rose-400 my-1 md:my-2 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse cursor-pointer select-none">❤️</span>
+                            <span onClick={() => setShowInstallMenu(true)} className="text-3xl md:text-5xl text-rose-400 my-1 md:my-2 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse cursor-pointer select-none">❤️</span>
                             <div className="flex items-center gap-2 md:gap-3">
                                 <span className="h-[2px] w-10 md:w-24 bg-gradient-to-l from-rose-500/30 to-transparent"></span>
                                 <span className="text-4xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-indigo-400 font-script drop-shadow-2xl">بتول</span>
@@ -940,27 +936,12 @@
                     {/* Final Scene */}
                     {showFinalScene && <FinalSceneComponent onClose={() => setShowFinalScene(false)} />}
                     {showInstallGuide && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in" onClick={() => setShowInstallGuide(false)}>
-                            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-rose-500/30 rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center shadow-[0_0_60px_rgba(225,29,72,0.2)]" onClick={e => e.stopPropagation()} dir="rtl">
-                                <div className="text-6xl mb-6">{isIOS ? '🍎' : '📱'}</div>
-                                <h2 className="text-3xl md:text-4xl font-bold text-rose-300 mb-6 font-script drop-shadow-md">ثبت التطبيق</h2>
-                                <p className="text-slate-300 text-lg mb-8 leading-relaxed">عشان تفضل معاك دايماً:</p>
-                                {isIOS ? (
-                                    <ol className="text-right text-slate-300 space-y-4 text-base md:text-lg mb-8 leading-relaxed">
-                                        <li>1️⃣ اضغط على علامة <strong class="text-rose-400">📤</strong> (مشاركة) في شريط العنوان</li>
-                                        <li>2️⃣ مرر لتحت واختار <strong class="text-rose-400">"إضافة إلى الشاشة الرئيسية"</strong></li>
-                                        <li>3️⃣ اضغط <strong class="text-rose-400">"إضافة"</strong> في أعلى اليمين</li>
-                                    </ol>
-                                ) : (
-                                    <ol className="text-right text-slate-300 space-y-4 text-base md:text-lg mb-8 leading-relaxed">
-                                        <li>1️⃣ اضغط على علامة <strong class="text-rose-400">✦</strong> في شريط العنوان</li>
-                                        <li>2️⃣ اختر <strong class="text-rose-400">"إضافة إلى الشاشة الرئيسية"</strong></li>
-                                        <li>3️⃣ اضغط <strong class="text-rose-400">"إضافة"</strong></li>
-                                    </ol>
-                                )}
-                                <button onClick={() => setShowInstallGuide(false)} className="bg-gradient-to-r from-rose-600 to-indigo-700 text-white px-10 py-4 rounded-full text-lg font-bold shadow-[0_0_30px_rgba(225,29,72,0.5)] hover:scale-105 transition-all border border-rose-400/30">
-                                    فهمت ✅
-                                </button>
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowInstallGuide(false)}>
+                            <div className="bg-slate-900 border border-rose-500/30 rounded-[2rem] p-8 max-w-xs w-full text-center" onClick={e => e.stopPropagation()} dir="rtl">
+                                <div className="text-5xl mb-4">📱</div>
+                                <h3 className="text-xl font-bold text-rose-300 mb-2">التثبيت غير متاح</h3>
+                                <p className="text-slate-400 text-sm mb-6">المتصفح لا يدعم التثبيت التلقائي</p>
+                                <button onClick={() => setShowInstallGuide(false)} className="bg-gradient-to-r from-rose-600 to-indigo-700 text-white px-8 py-3 rounded-full font-bold">حسناً</button>
                             </div>
                         </div>
                     )}
