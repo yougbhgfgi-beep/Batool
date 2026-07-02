@@ -482,6 +482,7 @@
                 const handler = (e) => {
                     e.preventDefault();
                     deferredPromptRef.current = e;
+                    setShowInstall(true);
                 };
                 window.addEventListener('beforeinstallprompt', handler);
                 window.addEventListener('appinstalled', () => setShowInstall(false));
@@ -756,7 +757,11 @@
                                 <span className="text-rose-300 text-xs font-bold hidden md:inline">{isPlaying ? '🎵 شغال' : '🎵 اضغط للتشغيل'}</span>
                             </div>
 
-                            {/* Install Button - hidden, use heart tap instead */}
+                            {showInstall && (
+                                <button onClick={handleInstall} className="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-2 rounded-full font-bold shadow-[0_0_15px_rgba(225,29,72,0.5)] transition-all hover:scale-105 active:scale-95 border border-rose-400/30">
+                                    تثبيت التطبيق 📲
+                                </button>
+                            )}
                         </div>
                     )}
 
