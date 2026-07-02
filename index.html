@@ -454,20 +454,13 @@
             ];
             const [currentSongIndex, setCurrentSongIndex] = useState(0);
             const deferredPromptRef = useRef(null);
-            const [showInstall, setShowInstall] = useState(false);
-            const [showInstallGuide, setShowInstallGuide] = useState(false);
-
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
             useEffect(() => {
                 const handler = (e) => {
                     e.preventDefault();
                     deferredPromptRef.current = e;
-                    setShowInstall(true);
                 };
                 window.addEventListener('beforeinstallprompt', handler);
-                window.addEventListener('appinstalled', () => setShowInstall(false));
-                if (isIOS) setShowInstall(true);
                 return () => window.removeEventListener('beforeinstallprompt', handler);
             }, []);
 
@@ -476,12 +469,9 @@
                 if (prompt) {
                     prompt.prompt();
                     const result = await prompt.userChoice;
-                    if (result.outcome === 'accepted') setShowInstall(false);
                     deferredPromptRef.current = null;
                 } else if (navigator.share) {
                     navigator.share({ title: 'بتول ❤️', url: window.location.href });
-                } else {
-                    setShowInstallGuide(true);
                 }
             };
 
@@ -931,16 +921,7 @@
 
                     {/* Final Scene */}
                     {showFinalScene && <FinalSceneComponent onClose={() => setShowFinalScene(false)} />}
-                    {showInstallGuide && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowInstallGuide(false)}>
-                            <div className="bg-slate-900 border border-rose-500/30 rounded-[2rem] p-8 max-w-xs w-full text-center" onClick={e => e.stopPropagation()} dir="rtl">
-                                <div className="text-5xl mb-4">📱</div>
-                                <h3 className="text-xl font-bold text-rose-300 mb-2">التثبيت غير متاح</h3>
-                                <p className="text-slate-400 text-sm mb-6">المتصفح لا يدعم التثبيت التلقائي</p>
-                                <button onClick={() => setShowInstallGuide(false)} className="bg-gradient-to-r from-rose-600 to-indigo-700 text-white px-8 py-3 rounded-full font-bold">حسناً</button>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
             );
         }

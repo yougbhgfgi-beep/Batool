@@ -1,4 +1,4 @@
-const CACHE = "love-cache-v2";
+const CACHE = "love-cache-v3";
 const urls = ["./", "./index.html", "./manifest.json", "./icon.svg", "./icon-192x192.png", "./icon-512x512.png", "./og-image.png"];
 
 self.addEventListener("install", (e) => {
